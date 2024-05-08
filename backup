@@ -1,0 +1,1191 @@
+***********************  _create_admin.php  *****************************
+<?php
+$server = "localhost";
+$username = "root";
+$password = "";
+$database = "create_admin";
+
+$conn = mysqli_connect($server, $username, $password, $database);
+if (!$conn){
+//     echo "success";
+// }
+// else{
+    die("Error". mysqli_connect_error());
+}
+
+?>
+***********************  _dbconnect.php  *****************************
+<?php
+$server = "localhost";
+$username = "root";
+$password = "";
+$database = "users";
+
+$conn = mysqli_connect($server, $username, $password, $database);
+if (!$conn){
+//     echo "success";
+// }
+// else{
+    die("Error". mysqli_connect_error());
+}
+
+?>
+***********************  _nav.php  *****************************
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <a class="navbar-brand" href="/loginsystem">Tarang</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item active">
+        <a class="nav-link" href="/loginsystem/welcome.php">Home <span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/loginsystem/login.php">Login</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/loginsystem/signup.php">Signup</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/loginsystem/logout.php">Logout</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/loginsystem/admin.php">Admin</a>
+      </li>
+       
+      
+    </ul>
+    <form class="form-inline my-2 my-lg-0">
+      <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+      <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+    </form>
+  </div>
+</nav>
+***********************  _profile.php  *****************************
+<?php
+$server = "localhost";
+$username = "root";
+$password = "";
+$database = "profile";
+
+$conn = mysqli_connect($server, $username, $password, $database);
+if (!$conn){
+//     echo "success";
+// }
+// else{
+    die("Error". mysqli_connect_error());
+}
+
+?>
+
+***********************  _user_info.php  *****************************
+<?php
+$server = "localhost";
+$username = "root";
+$password = "";
+$database = "user_info";
+
+$conn = mysqli_connect($server, $username, $password, $database);
+if (!$conn){
+//     echo "success";
+// }
+// else{
+    die("Error". mysqli_connect_error());
+}
+
+?>
+
+***********************  access_admin_show.php  *****************************
+<?php
+$login = false;
+$showError = false;
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    include 'partials/_create_admin.php'; // Include the file for database connection
+
+    // Check if the connection is successful
+    if (!$conn) {
+        die("Connection failed: " . mysqli_connect_error());
+    }
+
+    // Fetching input values
+    $aid = $_POST["aid"];
+    $password = $_POST["password"];
+
+    // SQL query to fetch user details
+    $sql = "SELECT * FROM create_admin WHERE aid=? AND password=?";
+    $stmt = mysqli_stmt_init($conn);
+
+    // Prepare the statement
+    if (mysqli_stmt_prepare($stmt, $sql)) {
+        // Bind parameters to the placeholders
+        mysqli_stmt_bind_param($stmt, "ss", $aid, $password);
+
+        // Execute the statement
+        mysqli_stmt_execute($stmt);
+
+        // Get the result
+        $result = mysqli_stmt_get_result($stmt);
+
+        // Check the number of rows in the result
+        if (mysqli_num_rows($result) == 1) {
+            // Valid user, set session variables and redirect
+            session_start();
+            $_SESSION['loggedin'] = true;
+            $_SESSION['aid'] = $aid;
+            $login = true;
+            header("location: show.php"); // Redirect to show.php
+            exit();
+        } else {
+            // Invalid credentials
+            $showError = "Invalid Credentials";
+        }
+    } else {
+        // SQL query preparation failed
+        $showError = "SQL Error";
+    }
+
+    // Close statement and database connection
+    mysqli_stmt_close($stmt);
+    mysqli_close($conn);
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Admin Account</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="container my-4">
+        <h1 class="text-center">Access Admin Account</h1>
+        <?php
+        if ($login) {
+            echo ' <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>Success!</strong> You are logged in
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div> ';
+        }
+        if ($showError) {
+            echo ' <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Error!</strong> ' . $showError . '
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div> ';
+        }
+        ?>
+        <form action="/loginsystem/access_admin_show.php" method="post">
+            <div class="form-group">
+                <label for="aid">Admin ID</label>
+                <input type="text" class="form-control" id="aid" name="aid" aria-describedby="emailHelp">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" class="form-control" id="password" name="password">
+            </div>
+            <button type="submit" class="btn btn-primary">Access</button>
+        </form>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+</body>
+
+</html>
+
+***********************  access_admin.php  *****************************
+<?php
+$login = false;
+$showError = false;
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    include 'partials/_create_admin.php'; // Include the file for database connection
+
+    // Check if the connection is successful
+    if (!$conn) {
+        die("Connection failed: " . mysqli_connect_error());
+    }
+
+    // Fetching input values
+    $aid = $_POST["aid"];
+    $password = $_POST["password"];
+
+    // SQL query to fetch user details
+    $sql = "SELECT * FROM create_admin WHERE aid=? AND password=?";
+    $stmt = mysqli_stmt_init($conn);
+
+    // Prepare the statement
+    if (mysqli_stmt_prepare($stmt, $sql)) {
+        // Bind parameters to the placeholders
+        mysqli_stmt_bind_param($stmt, "ss", $aid, $password);
+
+        // Execute the statement
+        mysqli_stmt_execute($stmt);
+
+        // Get the result
+        $result = mysqli_stmt_get_result($stmt);
+
+        // Check the number of rows in the result
+        if (mysqli_num_rows($result) == 1) {
+            // Valid user, set session variables and redirect
+            session_start();
+            $_SESSION['loggedin'] = true;
+            $_SESSION['aid'] = $aid;
+            $login = true;
+            header("location: user_info.php");
+            exit();
+        } else {
+            // Invalid credentials
+            $showError = "Invalid Credentials";
+        }
+    } else {
+        // SQL query preparation failed
+        $showError = "SQL Error";
+    }
+
+    // Close statement and database connection
+    mysqli_stmt_close($stmt);
+    mysqli_close($conn);
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Admin Account</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="container my-4">
+        <h1 class="text-center">Access Admin Account</h1>
+        <?php
+        if ($login) {
+            echo ' <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>Success!</strong> You are logged in
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div> ';
+        }
+        if ($showError) {
+            echo ' <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Error!</strong> ' . $showError . '
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div> ';
+        }
+        ?>
+        <form action="/loginsystem/access_admin.php" method="post">
+            <div class="form-group">
+                <label for="aid">Admin ID</label>
+                <input type="text" class="form-control" id="aid" name="aid" aria-describedby="emailHelp">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" class="form-control" id="password" name="password">
+            </div>
+            <button type="submit" class="btn btn-primary">Access</button>
+        </form>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+</body>
+
+</html>
+
+***********************  add_or_show.php  *****************************
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Admin Page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mt-5">Admin Panel</h1>
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-6">
+                <a href="access_admin.php" class="btn btn-primary btn-lg btn-block mb-3">Add account</a>
+                <a href="access_admin_show.php" class="btn btn-success btn-lg btn-block">Show all accounts</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+***********************  admin.php  *****************************
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Admin Page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mt-5">Admin Panel</h1>
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-6">
+                <a href="create_admin.php" class="btn btn-primary btn-lg btn-block mb-3">Create Admin Account</a>
+                <a href="add_or_show.php" class="btn btn-success btn-lg btn-block">Access Admin Account</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+***********************  bill.php  *****************************
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <title>Bill Information</title>
+</head>
+<body>
+    <?php require 'partials/_nav.php' ?>
+
+    <div class="container my-4">
+        <h1 class="text-center">Bill Information</h1>
+
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Customer Number</th>
+                            <th>Bill Number</th>
+                            <th>Name</th>
+                            <th>Bill Due Date</th>
+                            <th>KW</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        // Include database connection
+                        include 'partials/_user_info.php';
+                        include 'partials/_dbconnect.php';
+                        include 'partials/_profile.php';
+                        // Start the session to access logged-in user info
+                        session_start();
+                        
+                        // Check if the user is logged in
+                        if(isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
+                            // Get the logged-in user's username
+                            $username = $_SESSION['username'];
+                            
+                            // Fetch user's customer ID from the signup table in usersdb
+                            $sql_signup = "SELECT cid FROM users.users WHERE username = '$username'";
+                            $result_signup = mysqli_query($conn, $sql_signup);
+                            
+                            // Check if the query executed successfully
+                            if($result_signup) {
+                                // Check if any rows were returned
+                                if(mysqli_num_rows($result_signup) > 0) {
+                                    $row_signup = mysqli_fetch_assoc($result_signup);
+                                    $cid = $row_signup['cid'];
+                                    
+                                    // Fetch user info for the given customer ID from the user_info table in billdb
+                                    $sql_user_info = "SELECT * FROM `user_info`.`user_info` WHERE `cid` = '$cid'";
+                                    $result_user_info = mysqli_query($conn, $sql_user_info);
+                                    
+                                    // Check if the query executed successfully
+                                    if($result_user_info) {
+                                        // Check if there is any result
+                                        if (mysqli_num_rows($result_user_info) > 0) {
+                                            while ($row_user_info = mysqli_fetch_assoc($result_user_info)) {
+                                                echo '<tr>';
+                                                echo '<td>' . $row_user_info['cid'] . '</td>';
+                                                echo '<td>' . $row_user_info['bill_no'] . '</td>';
+                                                echo '<td>' . $row_user_info['name'] . '</td>';
+                                                echo '<td>' . $row_user_info['date'] . '</td>';
+                                                echo '<td>' . $row_user_info['kw'] . '</td>';
+                                                echo '</tr>';
+                                            }
+                                        } else {
+                                            echo '<tr><td colspan="5">No user info found for this customer ID.</td></tr>';
+                                        }
+                                    } else {
+                                        echo '<tr><td colspan="5">Error fetching user info: ' . mysqli_error($conn) . '</td></tr>';
+                                    }
+                                } else {
+                                    echo '<tr><td colspan="5">Customer ID not found for this user.</td></tr>';
+                                }
+                            } else {
+                                echo '<tr><td colspan="5">Error fetching customer ID: ' . mysqli_error($conn) . '</td></tr>';
+                            }
+                        } else {
+                            echo '<tr><td colspan="5">User is not logged in.</td></tr>';
+                        }
+                        ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+</body>
+</html>
+
+***********************  create_admin.php  *****************************
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Create Admin Account</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container">
+        <!-- <h1 class="text-center mt-5">Create Admin Account Page</h1> -->
+        <!-- Add your form or content for creating admin account here -->
+
+        <?php
+$showAlert = false;
+$showError = false;
+if($_SERVER["REQUEST_METHOD"] == "POST"){
+    include 'partials/_create_admin.php';
+    $aid = $_POST["aid"];
+    $fname = $_POST["fname"];
+    $mname = $_POST["mname"];
+    $lname = $_POST["lname"];
+    $email = $_POST["email"];
+    $add = $_POST["add"];
+    $password = $_POST["password"];
+    $exists=false;
+    if( $exists==false){
+        $sql = "INSERT INTO `create_admin` (`aid`,`fname`,`mname`,`lname`, `email`, `add`,`password`) VALUES ('$aid','$fname','$mname','$lname', '$email','$add','$password')";
+       $result = mysqli_query($conn, $sql);
+       if ($result){
+           $showAlert = true;
+           //Redirect to login page after successful signup
+            header("Location: access_admin.php");
+        exit; // Make sure to exit after redirection
+    }
+    }
+     else{
+         $showError = "Something is wrong";
+     }
+}
+?>
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <title>Admin</title>
+  </head>
+  <body>
+    <?php require 'partials/_nav.php' ?>
+    <?php
+    if($showAlert){
+    echo ' <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Success!</strong> Your admin account is now created
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div> ';
+    }
+    if($showError){
+    echo ' <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Error!</strong> '. $showError.'
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">×</span>
+        </button>
+    </div> ';
+    }
+    ?>
+
+    <div class="container my-4">
+     <h1 class="text-center">Create your Admin account</h1>
+     <form action="/loginsystem/create_admin.php" method="post">
+     <div class="form-group">
+            <label for="cid">Admin ID</label>
+            <input type="integer" class="form-control" id="aid" name="aid" aria-describedby="emailHelp">
+        </div>
+
+        <div class="form-group">
+            <label for="fname">first name</label>
+            <input type="text" class="form-control" id="fname" name="fname" aria-describedby="emailHelp">
+        </div>
+       
+        <div class="form-group">
+            <label for="mname">Middle name</label>
+            <input type="text" class="form-control" id="mname" name="mname" aria-describedby="emailHelp">
+        </div>
+
+        <div class="form-group">
+            <label for="lname">Last name</label>
+            <input type="text" class="form-control" id="lname" name="lname" aria-describedby="emailHelp">
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" class="form-control" id="email" name="email">
+            <small id="emailHelp" class="form-text text-muted">Make sure to enter email in @ format</small>
+        </div>
+        
+        <div class="form-group">
+            <label for="add">Address</label>
+            <input type="text" class="form-control" id="add" name="add" aria-describedby="emailHelp">
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="text" class="form-control" id="password" name="password" aria-describedby="emailHelp">
+        </div>
+         
+        <button type="submit" class="btn btn-primary">Create Admin Account</button>
+     </form>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  </body>
+</html>
+
+        
+    </div>
+</body>
+</html>
+
+***********************  login.php  *****************************
+<?php
+$login = false;
+$showError = false;
+if($_SERVER["REQUEST_METHOD"] == "POST"){
+    include 'partials/_dbconnect.php';
+    $username = $_POST["username"];
+    $password = $_POST["password"]; 
+    
+     
+     $sql = "Select * from users where username='$username' AND password='$password'";
+   // $sql = "Select * from users where username='$username'";
+    $result = mysqli_query($conn, $sql);
+    $num = mysqli_num_rows($result);
+    if ($num == 1){
+       // while($row=mysqli_fetch_assoc($result)){
+         //   if (password_verify($password, $row['password'])){ 
+                $login = true;
+               session_start();
+              $_SESSION['loggedin'] = true;
+              $_SESSION['username'] = $username;
+              header("location: wel.php");
+            } 
+            else{
+                $showError = "Invalid Credentials";
+            }
+        }
+        
+   // } 
+    else{
+        $showError = "Invalid Credentials";
+    }
+//}
+    
+?>
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <title>Login</title>
+  </head>
+  <body>
+    <?php require 'partials/_nav.php' ?>
+    <?php
+    if($login){
+    echo ' <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Success!</strong> You are logged in
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div> ';
+    }
+    if($showError){
+    echo ' <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Error!</strong> '. $showError.'
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div> ';
+    }
+    ?>
+
+    <div class="container my-4">
+     <h1 class="text-center">Login to our website</h1>
+     <form action="/loginsystem/login.php" method="post">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" class="form-control" id="username" name="username" aria-describedby="emailHelp">
+            
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" class="form-control" id="password" name="password">
+        </div>
+       
+         
+        <button type="submit" class="btn btn-primary">Login</button>
+     </form>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  </body>
+</html>
+***********************  logout.php  *****************************
+***********************  profile.php  *****************************
+<?php
+$showAlert = false;
+$showError = false;
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    include 'partials/_profile.php';
+    $cid = $_POST["cid"];
+    $f_name = $_POST["f_name"];
+    $m_name = $_POST["m_name"];
+    $l_name = $_POST["l_name"];
+    $email = $_POST["email"];
+    $add = $_POST["add"];
+    $exists = false;
+
+    // Check if the form fields are not empty
+    if (!empty($cid) && !empty($f_name) && !empty($l_name) && !empty($email) && !empty($add)) {
+        if (!$exists) {
+            $sql = "INSERT INTO `profile` (`cid`,`f_name`,`m_name`,`l_name`, `email`, `add`) VALUES ('$cid','$f_name','$m_name','$l_name', '$email','$add')";
+            $result = mysqli_query($conn, $sql);
+
+            if ($result) {
+                $showAlert = true;
+                // Set a session variable to indicate the success message was shown
+                $_SESSION['showAlert'] = true;
+            } else {
+                $showError = "Something went wrong: " . mysqli_error($conn);
+            }
+        } else {
+            $showError = "Profile already exists";
+        }
+    } else {
+        $showError = "All fields are required";
+    }
+}
+?>
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <title>Profile</title>
+    <style>
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 115vh;
+        }
+    </style>
+</head>
+
+<body>
+    <?php require 'partials/_nav.php' ?>
+    <?php
+    if ($showAlert) {
+        echo ' <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
+            <strong>Success!</strong> Your profile is now created
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div> ';
+    }
+    if ($showError) {
+        echo ' <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Error!</strong> ' . $showError . '
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">×</span>
+            </button>
+        </div> ';
+    }
+    ?>
+
+    <div class="container">
+        <div class="card" style="width: 30rem;">
+            <div class="card-body">
+                <h1 class="card-title text-center">Create your Profile</h1>
+                <form action="/loginsystem/profile.php" method="post">
+                    <div class="form-group">
+                        <label for="cid">Customer ID</label>
+                        <input type="integer" class="form-control" id="cid" name="cid" aria-describedby="emailHelp" <?php if ($showAlert) echo 'disabled'; ?>>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="f_name">First name</label>
+                        <input type="text" class="form-control" id="f_name" name="f_name" aria-describedby="emailHelp" <?php if ($showAlert) echo 'disabled'; ?>>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="m_name">Middle name</label>
+                        <input type="text" class="form-control" id="m_name" name="m_name" aria-describedby="emailHelp" <?php if ($showAlert) echo 'disabled'; ?>>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="l_name">Last name</label>
+                        <input type="text" class="form-control" id="l_name" name="l_name" aria-describedby="emailHelp" <?php if ($showAlert) echo 'disabled'; ?>>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" <?php if ($showAlert) echo 'disabled'; ?>>
+                        <small id="emailHelp" class="form-text text-muted">Make sure to enter email in @ format</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="add">Address</label>
+                        <input type="text" class="form-control" id="add" name="add" aria-describedby="emailHelp" <?php if ($showAlert) echo 'disabled'; ?>>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" <?php if ($showAlert) echo 'disabled'; ?>>Create Profile</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+    <script>
+        // Redirect to wel.php after 3 seconds if the success message is shown
+        <?php if ($showAlert) { ?>
+            setTimeout(function() {
+                window.location.href = 'wel.php';
+            }, 3000); // 3 seconds
+        <?php } ?>
+    </script>
+</body>
+
+</html>
+
+***********************  show.php  *****************************
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <title>Bill Information</title>
+</head>
+<body>
+    <?php require 'partials/_nav.php' ?>
+    <?php require 'partials/_user_info.php' ?>
+
+    <div class="container my-4">
+        <h1 class="text-center">All customer Information</h1>
+
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Customer Number</th>
+                            <th>Bill Number</th>
+                            <th>Name</th>
+                            <th>Bill Due Date</th>
+                            <th>KW</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        // Include database connection
+                        include 'partials/_user_info.php';
+                        
+                        // Fetch all records from user_info table
+                        $sql_user_info = "SELECT * FROM `user_info`";
+                        $result_user_info = mysqli_query($conn, $sql_user_info);
+                        
+                        // Check if the query executed successfully
+                        if($result_user_info) {
+                            // Check if there is any result
+                            if (mysqli_num_rows($result_user_info) > 0) {
+                                while ($row_user_info = mysqli_fetch_assoc($result_user_info)) {
+                                    echo '<tr>';
+                                    echo '<td>' . $row_user_info['cid'] . '</td>';
+                                    echo '<td>' . $row_user_info['bill_no'] . '</td>';
+                                    echo '<td>' . $row_user_info['name'] . '</td>';
+                                    echo '<td>' . $row_user_info['date'] . '</td>';
+                                    echo '<td>' . $row_user_info['kw'] . '</td>';
+                                    echo '</tr>';
+                                }
+                            } else {
+                                echo '<tr><td colspan="5">No user info found.</td></tr>';
+                            }
+                        } else {
+                            echo '<tr><td colspan="5">Error fetching user info: ' . mysqli_error($conn) . '</td></tr>';
+                        }
+                        ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+</body>
+</html>
+
+***********************  signup.php  *****************************
+<?php
+$showAlert = false;
+$showError = false;
+if($_SERVER["REQUEST_METHOD"] == "POST"){
+    include 'partials/_dbconnect.php';
+    $cid = $_POST["cid"];
+    $username = $_POST["username"];
+    $password = $_POST["password"];
+    $cpassword = $_POST["cpassword"];
+    $exists=false;
+    if(($password == $cpassword) && $exists==false){
+        $sql = "INSERT INTO `users` (`cid`,`username`, `password`, `date`) VALUES ('$cid','$username', '$password', current_timestamp())";
+        $result = mysqli_query($conn, $sql);
+        if ($result){
+            $showAlert = true;
+            // Redirect to login page after successful signup
+            header("Location: login.php");
+            exit; // Make sure to exit after redirection
+        }
+    }
+    else{
+        $showError = "Passwords do not match";
+    }
+}
+?>
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <title>SignUp</title>
+  </head>
+  <body>
+    <?php require 'partials/_nav.php' ?>
+    <?php
+    if($showAlert){
+    echo ' <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Success!</strong> Your account is now created and you can login
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div> ';
+    }
+    if($showError){
+    echo ' <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Error!</strong> '. $showError.'
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">×</span>
+        </button>
+    </div> ';
+    }
+    ?>
+
+    <div class="container my-4">
+     <h1 class="text-center">Signup to our website</h1>
+     <form action="/loginsystem/signup.php" method="post">
+
+     </div>
+        <div class="form-group">
+            <label for="cid">Customer id</label>
+            <input type="integer" class="form-control" id="cid" name="cid">
+        </div>
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" class="form-control" id="username" name="username" aria-describedby="emailHelp">
+         </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" class="form-control" id="password" name="password">
+        </div>
+        <div class="form-group">
+            <label for="cpassword">Confirm Password</label>
+            <input type="password" class="form-control" id="cpassword" name="cpassword">
+            <small id="emailHelp" class="form-text text-muted">Make sure to type the same password</small>
+        </div>
+         
+        <button type="submit" class="btn btn-primary">SignUp</button>
+     </form>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  </body>
+</html>
+
+***********************  user_info.php  *****************************
+<?php
+$showAlert = false;
+$showError = false;
+if($_SERVER["REQUEST_METHOD"] == "POST"){
+    include 'partials/_user_info.php'; // Include the file for database connection
+    $cid = $_POST["cid"];
+    $bill_no = $_POST["bill_no"];
+    $name = $_POST["name"];
+    $kw = $_POST["kw"];
+    $exists=false;
+    
+    // Check if customer ID already exists
+    $sql = "SELECT * FROM `user_info` WHERE `cid` = '$cid'";
+    $result = mysqli_query($conn, $sql);
+    $numExistRows = mysqli_num_rows($result);
+    if ($numExistRows > 0) {
+        $showError = "Customer ID already exists!";
+    } else {
+        // Insert user info into the database
+        $sql = "INSERT INTO `user_info` (`cid`, `bill_no`, `name`, `kw`) VALUES ('$cid', '$bill_no','$name', '$kw')";
+        $result = mysqli_query($conn, $sql);
+        if ($result) {
+            $showAlert = true;
+        } else {
+            $showError = "Something went wrong!";
+        }
+    }
+}
+?>
+
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>User Info</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+</head>
+<body>
+    <?php require 'partials/_nav.php' ?>
+    <?php
+    if($showAlert){
+        echo '<div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>Success!</strong> User info successfully entered.
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>';
+    }
+    if($showError){
+        echo '<div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Error!</strong> '. $showError .'
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>';
+    }
+    ?>
+
+    <div class="container my-4">
+        <h1 class="text-center">Enter User Info</h1>
+        <form action="/loginsystem/user_info.php" method="post">
+            <div class="form-group">
+                <label for="cid">Customer ID</label>
+                <input type="text" class="form-control" id="cid" name="cid" aria-describedby="emailHelp">
+            </div>
+
+            <div class="form-group">
+                <label for="bill_no">Bill Number</label>
+                <input type="text" class="form-control" id="bill_no" name="bill_no" aria-describedby="emailHelp">
+            </div>
+
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" id="name" name="name" aria-describedby="emailHelp">
+            </div>
+
+            <div class="form-group">
+                <label for="kw">Kilo-Watt</label>
+                <input type="text" class="form-control" id="kw" name="kw" aria-describedby="emailHelp">
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Add User Info</button>
+        </form>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+</body>
+</html>
+
+***********************  wel.php  *****************************
+<?php
+session_start(); // Start the session
+
+if(!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true){
+    header("location: login.php");
+    exit;
+}
+
+// Regenerate session ID to prevent session fixation attacks
+session_regenerate_id(true);
+?>
+
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <title>Welcome - <?php echo isset($_SESSION['username']) ? $_SESSION['username'] : 'Guest' ?></title>
+    <style>
+        .sidebar {
+            height: calc(100vh - 120px); /* Adjusted height to fit below the company name */
+            width: 250px;
+            position: fixed;
+            top: 100px; /* Added top margin for the company name */
+            left: 0;
+            background-color: #aed9e0; /* Pastel blue background color */
+            padding-top: 70px;
+        }
+
+        .content {
+            margin-left: 220px;
+            padding: 201px;
+        }
+
+        .option {
+            margin-bottom: 70px; /* Increased margin for more vertical space */
+        }
+
+        .company-name {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100px; /* Increased height for a broader header */
+            background-color: #001F3F; /* Navy blue background color */
+            color: white;
+            font-size: 38px; /* Increased font size */
+            line-height: 100px; /* Centering the text vertically */
+            text-align: center;
+        }
+
+        .alert-message {
+            margin-top: 80px; /* Adjusted margin to position below the header */
+        }
+    </style>
+</head>
+<body>
+    <div class="company-name">
+        Tarang Electric Company <!-- Change this to your company name -->
+    </div>
+
+    <div class="sidebar">
+        <div class="option">
+            <a href="profile.php" class="btn btn-dark btn-block">User Profile</a> <!-- Link to profile.php -->
+        </div>
+        <div class="option">
+            <a href="bill.php" class="btn btn-dark btn-block">Bill</a> <!-- Link to bill.php -->
+        </div>
+        <div class="option">
+            <a href="#" class="btn btn-dark btn-block">Payment History</a>
+        </div>
+        <div class="option">
+            <a href="/loginsystem/logout.php" class="btn btn-dark btn-block">Logout</a>
+        </div>
+    </div>
+
+    <div class="content">
+        <h2>Welcome - <?php echo isset($_SESSION['username']) ? $_SESSION['username'] : 'Guest' ?></h2>
+        <div class="alert alert-success alert-message" role="alert">
+            <p>Hey, how are you doing? Welcome to your electricity bill management system. You are logged in as <?php echo isset($_SESSION['username']) ? $_SESSION['username'] : 'Guest' ?>.</p>
+        </div>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+</body>
+</html>
+
